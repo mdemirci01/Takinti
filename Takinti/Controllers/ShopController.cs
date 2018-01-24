@@ -12,6 +12,10 @@ namespace Takinti.Controllers
         // GET: Shop
         public ActionResult Cart()
         {
+            if (Request.IsAjaxRequest())
+            {
+                return View("LayoutCart");
+            }
             return View();
         }
         public ActionResult Checkout()
@@ -31,24 +35,45 @@ namespace Takinti.Controllers
                 ((Cart)Session["Cart"]).UserName = User.Identity.Name;
                 ((Cart)Session["Cart"]).UpdateDate = DateTime.Now;
 
-                var cartItem = new CartItem();
-                cartItem.Quantity = 1;
-
-                var product = db.Products.FirstOrDefault(p =>
-                p.Slug.ToLower() == slug.ToLower()
-                && p.IsInStock == true && p.Quantity > 0 && p.IsPublished == true);
-                if (product == null)
+                CartItem cartItem = ((Cart)Session["Cart"]).CartItems
+                    .FirstOrDefault(c => c.Product.Slug.ToLower() == slug.ToLower());
+                if (cartItem == null)
                 {
-                    return Json(false);
+                    cartItem = new CartItem();
+                    cartItem.Quantity = 1;
+                    var product = db.Products.FirstOrDefault(p =>
+                    p.Slug.ToLower() == slug.ToLower()
+                    && p.IsInStock == true && p.Quantity > 0 && p.IsPublished == true);
+                    if (product == null)
+                    {
+                        return Json(false);
+                    }
+                    cartItem.ProductId = product.Id;
+                    cartItem.Product = product;
+                    cartItem.CreateDate = DateTime.Now;
+                    ((Cart)Session["Cart"]).CartItems.Add(cartItem);
+                } else {
+                    cartItem.Quantity += 1;
                 }
-                cartItem.ProductId = product.Id;
-                cartItem.Product = product;
-                cartItem.CreateDate = DateTime.Now;
-                ((Cart)Session["Cart"]).CartItems.Add(cartItem);
+                
                 return Json(CartProductCount());
             }
         }
+        public JsonResult RemoveFromCart(string slug)
+        {
+            if (Session["Cart"] == null)
+            {
+                Session["Cart"] = new Cart();
+            }
 
+            var cartItem = ((Cart)Session["Cart"]).CartItems
+                .FirstOrDefault(c => c.Product.Slug.ToLower() == slug.ToLower());
+            if (cartItem != null)
+            {
+                ((Cart)Session["Cart"]).CartItems.Remove(cartItem);
+            }
+            return Json(CartProductCount());
+        }
         public int CartProductCount()
         {
             if (Session["Cart"] != null)
