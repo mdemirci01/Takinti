@@ -1,4 +1,4 @@
-﻿
+﻿@model Takinti.Models.CheckoutViewModel
 @{
     ViewBag.Title = "Alışverişi Tamamla";
 }
@@ -28,41 +28,31 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8 col-lg-8">
+                @using (Html.BeginForm())
+                {
                 <div class="ckeckout-left-sidebar">
                     <!-- Start Checkbox Area -->
                     <div class="checkout-form">
                         <h2 class="section-title-3">Fatura Ayrıntıları</h2>
                         <div class="checkout-form-inner">
                             <div class="single-checkout-box">
-                                <input type="text" placeholder="Ad Soyad*">
-                                <input type="text" placeholder="TC Kimlik No/Vergi No*">
+                                @Html.TextBoxFor(model => model.FullName, null, new { placeholder="Ad Soyad*"})
+                                @Html.TextBoxFor(model => model.IdentityNumber, null, new { placeholder = "TC Kimlik No/Vergi No*" })
                             </div>
                             <div class="single-checkout-box">
-                                <input type="email" placeholder="E-posta*">
-                                <input type="text" placeholder="Telefon*">
+                                @Html.TextBoxFor(model => model.Email, null, new { placeholder="E-posta*"})
+                                @Html.TextBoxFor(model => model.Phone, null, new { placeholder="Telefon*"})
                             </div>
                             <div class="single-checkout-box">
-                                <textarea name="address" placeholder="Adres*"></textarea>
+                                @Html.TextAreaFor(model => model.Address, new { placeholder = "Adres*" })
                             </div>
                             <div class="single-checkout-box select-option mt--40">
-                                <select>
-                                    <option>Ülke*</option>
-                                    <option>Türkiye</option>
-                                    <option>Bangladesh</option>
-                                    <option>Bangladesh</option>
-                                    <option>Bangladesh</option>
-                                </select>
-                                <input type="text" placeholder="Firma Adı">
+                                @Html.DropDownListFor(model => model.CountryId, (IEnumerable<SelectListItem>)ViewBag.Countries, "Ülke*")
+                                @Html.TextBoxFor(model=>model.CompanyName, null, new { placeholder="Firma Adı"})
                             </div>
                             <div class="single-checkout-box">
-                                <select>
-                                    <option>Şehir*</option>
-                                    <option>İstanbul</option>
-                                    <option>Bangladesh</option>
-                                    <option>Bangladesh</option>
-                                    <option>Bangladesh</option>
-                                </select>
-                                <input type="text" placeholder="Posta Kodu*">
+                                @Html.DropDownListFor(model => model.CityId, (IEnumerable<SelectListItem>)ViewBag.Cities, "Şehir*")
+                                @Html.TextBoxFor(model => model.PostalCode, null, new { placeholder = "Posta Kodu" })
                             </div>
                         </div>
                     </div>
@@ -73,28 +63,29 @@
                         <p>Sitemiz SSL sertifikası ile korunmaktadır, ayrıca 3D güvenlik kullanmaktayız.</p>
                         <div class="payment-form-inner">
                             <div class="single-checkout-box">
-                                <input type="text" placeholder="Kart Üzerindeki İsim*">
-                                <input type="text" placeholder="Kart Numarası*">
+                                @Html.TextBoxFor(model => model.CardHolderName, null, new { placeholder = "Kart Üzerindeki İsim*" })
+                                @Html.TextBoxFor(model => model.CardNumber, null, new { placeholder = "Kart Numarası*" })
                             </div>
                             <div class="single-checkout-box">
-                                <input type="text" class="form-control pull-right" placeholder="Güvenlik Kodu*">
+                                @Html.TextBoxFor(model=>model.CCV, null, new { placeholder= "Güvenlik Kodu*", @class= "form-control pull-right"})
                                 <div class="input-group pull-left" style="display:inline-block;">
                                     <div style="display:inline-block;">
-                                        <select class="form-control" style="width:167px;">
-                                            <option>Ay*</option>
-                                            <option>01</option>
-                                            <option>02</option>
-                                            <option>03</option>
-                                            <option>04</option>
+                                        <select name="Month" class="form-control" style="width:167px;">
+                                            <option value="">Ay*</option>
+                                            @for (var i = 1; i <= 12; i++)
+                                        {
+                                        <option value="@i" @(Model != null && Model.Month == i?"selected='selected'":"")>@string.Format("{0:00}",i)</option>
+                                            }
+                                            
                                         </select>
                                     </div><div style="display:inline-block;">
-                                        <select class="form-control" style="width:167px;">
-                                            <option>Yıl*</option>
-                                            <option>2018</option>
-                                            <option>2019</option>
-                                            <option>2020</option>
-                                            <option>2021</option>
-                                        </select>
+                                              <select name="Year" class="form-control" style="width:167px;">
+                                                  <option value="">Yıl*</option>
+                                                  @for (var i = DateTime.Now.Year; i <= (DateTime.Now.Year + 20); i++)
+    {
+                                              <option value="@i">@i</option>
+}
+                                              </select>
                                     </div>
 
                                 </div>
@@ -116,12 +107,12 @@
                             <li><a href="#"><img src="/images/payment/4.jpg" alt="payment-img"></a></li>
                             <li><a href="#"><img src="/images/payment/5.jpg" alt="payment-img"></a></li>
                         </ul>
-                        <div class="checkout-btn">
-                            <a class="ts-btn btn-light btn-large hover-theme" href="#">ÖDEMEYİ YAP VE SATIN AL</a>
-                        </div>
+                        <strong>Tahsil Edilecek Tutar: @(Session["Cart"]!=null?((Takinti.Models.Cart)Session["Cart"]).TotalPrice.ToString():"0")₺</strong>
+                        <button type="submit" class="btn btn-primary btn-large hover-theme">ÖDEMEYİ YAP VE SATIN AL</button>
                     </div>
                     <!-- End Payment Way -->
                 </div>
+                }
             </div>
             <div class="col-md-4 col-lg-4">
                 <div class="checkout-right-sidebar">

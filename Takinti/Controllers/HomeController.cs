@@ -7,6 +7,7 @@ using Takinti.Models;
 
 namespace Takinti.Controllers
 {
+    [RouteArea("")]
     public class HomeController : Controller
     {
         public ActionResult Index()
